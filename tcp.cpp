@@ -24,6 +24,8 @@ int twsn_tcp_parser::max_wait_for_heartjump_seconds = 0;
 int twsn_tcp_parser::max_wait_for_authentication_pass_seconds = 10;
 #endif
 
+char request_system_time_package_validate[3] = {0x6a, 0x0a, 0x11};
+char identify_package_header[2] = {0xaa, 0x0d};
 char identify_package_const[4] = {0x1b, 0x11, 0x12, 0x7f};
 char identify_package_mac[24][6] = {
 		{0x00, 0x00, 0xb4, 0x00, 0x22, 0xee},
@@ -71,7 +73,8 @@ public:
 				size_t& rev_data_size,
 				size_t& remain_size,
 				error_what& e_what){
-		if(rev_data[0] == 0xAA && rev_data[1] == 0x0D){
+
+		if(memcmp(rev_data, identify_package_header, 2) == 0){
 			// Identify frame
 			remain_size = 12;
 		}else{
@@ -79,6 +82,18 @@ public:
 			u16_t size = 0;
 			memcpy(&size, rev_data + 1, 1);
 			remain_size = size + 1;
+		}
+
+		{
+			string_ex t;
+			LOCAL_LOG_VISITOR_TYPE::instance()->handle(LOG_LEVEL_DEBUG, LOG_TAG_TCP_ACCEPTOR,
+					(string_append().add("hdr:")
+					->add(t.pointer_to_long((void*)p.get()))
+					->add(",read_pk_header_complete, data:")
+					->add(t.stream_to_string(rev_data, rev_data_size))
+					->add(",remain_size:")
+					->add(remain_size)
+					->to_string()));
 		}
 
 		return 0;
@@ -90,8 +105,18 @@ public:
 				size_t& rev_data_size,
 				error_what& e_what){
 
+		{
+			string_ex t;
+			LOCAL_LOG_VISITOR_TYPE::instance()->handle(LOG_LEVEL_DEBUG, LOG_TAG_TCP_ACCEPTOR,
+					(string_append().add("hdr:")
+					->add(t.pointer_to_long((void*)p.get()))
+					->add(",read_pk_full_complete, data:")
+					->add(t.stream_to_string(rev_data, rev_data_size))
+					->to_string()));
+		}
+
 		// Whether is identify frame.
-		if(rev_data[0] == 0xAA && rev_data[1] == 0x0D){
+		if(memcmp(rev_data, identify_package_header, 2) == 0){
 
 			// Validate const.
 			{
@@ -142,10 +167,14 @@ public:
 				u16_t code = 0;
 				memcpy(&code, rev_data + rev_data_size - 2, 2);
 				u32_t cal = 5762 * code;
-				memcpy(rep + 9, &cal, 1);
-				memcpy(rep + 6, &cal + 1, 1);
-				memcpy(rep + 5, &cal + 1 + 1, 1);
-				memcpy(rep + 10, &cal + 1 + 1 + 1, 1);
+				char cal_p[4];
+				memset(cal_p, 0x00, 4);
+				memcpy(cal_p, &cal, 4);
+
+				memcpy(rep + 9, cal_p, 1);
+				memcpy(rep + 6, cal_p + 1, 1);
+				memcpy(rep + 5, cal_p + 2, 1);
+				memcpy(rep + 10, cal_p + 3, 1);
 
 				// Make crc
 				u8_t chr = rep[0] ^ rep[1];
@@ -176,7 +205,9 @@ public:
 		}
 
 		// Whether is request system time.
-		if(rev_data[0] == 0x6A && rev_data[1] == 0x0A && rev_data[6] == 0x11){
+		if(memcmp(rev_data, request_system_time_package_validate, 1) == 0 &&
+				memcmp(rev_data + 1, request_system_time_package_validate + 1, 1) ==0 &&
+				memcmp(rev_data + 6, request_system_time_package_validate + 2, 1) == 0){
 
 			// Get now.
 			ptime p1 = boost::posix_time::microsec_clock::local_time();
@@ -221,8 +252,8 @@ public:
 
 				// Make crc
 				u8_t chr = rep[1] ^ rep[2];
-				for (int i = 3; i < 19; i++) {
-					chr = chr ^ rev_data[i];
+				for (int i = 3; i < 18; i++) {
+					chr = chr ^ rep[i];
 				}
 				rep[18] = chr;
 
@@ -360,6 +391,8 @@ public:
 				->add(t.pointer_to_long((void*)p.get()))
 				->add(",err_code:")
 				->add(e_what.err_no())
+				->add(",err_msg:")
+				->add(e_what.err_message().c_str())
 				->add(",do catch_error()")
 				->to_string()));
 	}
@@ -381,6 +414,22 @@ public:
 						->add(",do close_completed_erase_hander_mgr(),ec_value:")
 						->add(ec_value)
 						->to_string()));
+		}
+	}
+
+	void write_pk_full_complete_func(
+				pointer p,
+				char*& snd_p,
+				size_t& snd_size,
+				const boost::system::error_code& ec){
+		if(!ec){
+			string_ex t;
+			LOCAL_LOG_VISITOR_TYPE::instance()->handle(LOG_LEVEL_DEBUG, LOG_TAG_TCP_ACCEPTOR,
+					(string_append().add("hdr:")
+					->add(t.pointer_to_long((void*)p.get()))
+					->add(",write data success, data:")
+					->add(t.stream_to_string(snd_p, snd_size))
+					->to_string()));
 		}
 	}
 };

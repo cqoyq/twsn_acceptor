@@ -41,7 +41,7 @@ OBJS =  main.o \
 			rep_thr.o
 		
 ifeq ($(ShowDebug),y)
-DEBUGS = -DMY_TEST
+DEBUGS = -DMY_DEBUG
 else
 DEBUGS =
 endif
