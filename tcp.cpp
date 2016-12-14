@@ -568,8 +568,8 @@ void make_tcp_acceptor(){
 	bingo::TCP::config::tcp_receiver_cfg  config;
 	if(!config.read_xml()){
 
-		CONSOLE_LOGGER_TYPE::instance()->handle(LOG_LEVEL_ERROR, LOG_TAG_TCP_ACCEPTOR,
-				string_append().add("read cfg.xml fail, err_msg:")
+		CONSOLE_LOGGER_TYPE::instance()->handle(LOG_LEVEL_ERROR, LOG_TAG_MAIN_FUNCTION,
+				string_append().add("read tcp configuration fail, err_msg:")
 				->add(config.err().err_message().c_str())->to_string()
 				);
 
@@ -591,6 +591,10 @@ void make_tcp_acceptor(){
 	} catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;
 	}
+
+	CONSOLE_LOGGER_TYPE::instance()->handle(LOG_LEVEL_ERROR, LOG_TAG_MAIN_FUNCTION,
+					string_append().add("tcp ios exist!")->to_string()
+					);
 
 	twsn_tcp_mgr::release();
 }

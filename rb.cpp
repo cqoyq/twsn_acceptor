@@ -18,16 +18,16 @@ void make_rb_sendor(){
 	// Create rabbitmq-sendor.
 	if(!RABBITMQ_FACTORY_TYPE::instance()->make_p2p_sendor(p)){
 		string_append ap;
-		ap.add("make sendor fail!, err_msg:")->add(RABBITMQ_FACTORY_TYPE::instance()->err().err_message().c_str());
-		p->handle(LOG_LEVEL_ERROR, LOG_TAG_RABBITMQ_SENDOR, ap.to_string());
+		ap.add("make rabbitmq sendor fail!, err_msg:")->add(RABBITMQ_FACTORY_TYPE::instance()->err().err_message().c_str());
+		p->handle(LOG_LEVEL_ERROR, LOG_TAG_MAIN_FUNCTION, ap.to_string());
 
 		// Close progresss.
 		exit(0);
 
 	}else{
 		string_append ap;
-		ap.add("make sendor success!");
-		p->handle(LOG_LEVEL_DEBUG, LOG_TAG_RABBITMQ_SENDOR, ap.to_string());
+		ap.add("make rabbitmq sendor success!");
+		p->handle(LOG_LEVEL_DEBUG, LOG_TAG_MAIN_FUNCTION, ap.to_string());
 	}
 }
 
@@ -86,17 +86,17 @@ void make_rb_receiver(){
 	if(!RABBITMQ_FACTORY_TYPE::instance()->make_p2p_receiver(p, bind(rev, _1))){
 
 		string_append ap;
-		ap.add("make receiver fail!, err:")
+		ap.add("make rabbitmq receiver fail!, err:")
 												->add(string(RABBITMQ_FACTORY_TYPE::instance()->err().err_message()));
-		p->handle(LOG_LEVEL_ERROR, LOG_TAG_RABBITMQ_RECEIVER, ap.to_string());
+		p->handle(LOG_LEVEL_ERROR, LOG_TAG_MAIN_FUNCTION, ap.to_string());
 		// Close progresss.
 		exit(0);
 
 	}else{
 
 		string_append ap;
-		ap.add("make receiver succee!");
-		p->handle(LOG_LEVEL_DEBUG, LOG_TAG_RABBITMQ_RECEIVER, ap.to_string());
+		ap.add("make rabbitmq receiver succee!");
+		p->handle(LOG_LEVEL_DEBUG, LOG_TAG_MAIN_FUNCTION, ap.to_string());
 
 	}
 }

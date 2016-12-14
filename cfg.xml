@@ -24,4 +24,10 @@
 					<rabbitmq_key>logger</rabbitmq_key>
 					<log_level>all</log_level>					
 	</rbmq_log_visitor>
+	<local_log_visitor>
+					<type>every_day</type>	
+					<filename>log</filename>		
+					<path>logs</path>					
+					<level>all</level>					
+	</local_log_visitor>
 </application>

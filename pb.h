@@ -26,6 +26,7 @@ using namespace boost;
 using namespace bingo;
 using namespace bingo::log;
 
+#define LOG_TAG_MAIN_FUNCTION			"twsn_acceptor_main"
 #define LOG_TAG_RABBITMQ_SENDOR 	"twsn_acceptor_rabbitmq_sendor"
 #define LOG_TAG_RABBITMQ_RECEIVER 	"twsn_acceptor_rabbitmq_receiver"
 #define LOG_TAG_TCP_ACCEPTOR 			"twsn_acceptor_tcp_service"

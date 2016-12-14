@@ -4,6 +4,7 @@
 /*.o
 /*.so
 /twsn_acceptor
+/logs/log.*
 /log*
 /*w.xml
 /bingo/*.o
